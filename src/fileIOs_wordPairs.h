@@ -10,8 +10,6 @@ namespace NS_WORDPAIRS{
 
     void sentenceSplitter(std::string& fname, std::vector<std::string>& sentences);
 
-    std::string splitter(std::string& line);
-
     void wordpairMapping(std::vector<std::string>& sentences, std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map);
 
     void freqWordpairMmap(std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map, std::multimap<int, std::pair<std::string, std::string> > &freqWordpair_mmap );

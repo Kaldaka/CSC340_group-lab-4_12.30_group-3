@@ -2,16 +2,15 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <iterator>
 
 namespace NS_WORDPAIRS{
 
     void sentenceSplitter(std::string& fname, std::vector<std::string>& sentences){
-        //TODO: split sentences based on ". or ? or ." or ?" or \n"
         std::map<std::pair<std::string, std::string>, int> wordPairFreq_map;
         std::string fileName = fname;
         std::string line = "";
         std::ifstream inFS;
-        std::cout << "opening " << fileName << "..." << std::endl;
 
         inFS.open(fileName);
         if (!inFS.is_open()) {
@@ -20,17 +19,29 @@ namespace NS_WORDPAIRS{
             sentenceSplitter(fileName, sentences);
         }
 
-        while (!inFS.fail()) {
-            std::getline(inFS, line);
-            sentences.push_back(splitter(line));
+        while (std::getline(inFS, line)) {
+            std::string::iterator it = line.begin();
+            int fromIndex = 0;
+            int toIndex = it - line.begin();
+            if (line != "") {
+                while (it != line.end()) {
+                    if (*it == '.' || *it == '?') {
+                        toIndex = (it - line.begin()) - fromIndex;
+                        sentences.push_back(line.substr(fromIndex, toIndex));
+                        if (it + 1 != line.end() && *(it + 1) == '"') {
+                            fromIndex = it - line.begin() + 3;
+                        }
+                        else {
+                            fromIndex = it - line.begin() + 2;
+                        }
+                    }
+                    it++;
+                }
+            }   
         }
-        wordpairMapping(sentences, wordPairFreq_map);
-    }
 
-    std::string splitter(std::string& line) {
-        std::regex delim("[.?]\\n?|\"[.?]\"");
-        std::string loneSentence = "";
-        return loneSentence;
+        wordpairMapping(sentences, wordPairFreq_map);
+        inFS.close();
     }
 
     void wordpairMapping(std::vector<std::string>& sentences, std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map){
