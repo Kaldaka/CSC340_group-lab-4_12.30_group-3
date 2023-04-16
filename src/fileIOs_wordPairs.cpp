@@ -49,11 +49,33 @@ namespace NS_WORDPAIRS{
     }
 
     void freqWordpairMmap(std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map, std::multimap<int, std::pair<std::string, std::string> > &freqWordpair_mmap ){
-
+        for (const auto& pair : wordpairFreq_map) {
+            freqWordpair_mmap.insert(std::make_pair(pair.second, pair.first));
+        }
     }
 
     void printWordpairs(std::multimap<int, std::pair<std::string, std::string> > &freqWordpair_multimap, std::string outFname, int topCnt, int botCnt){
+        std::ofstream outFile(outFname);
 
-    }
+        if (!outFile.is_open()) {
+            std::cout << "Error opening output file." << std::endl;
+            return;
+        }
 
+        outFile << "Top " << topCnt << " most frequent word-pairs:" << std::endl;
+        auto rit = freqWordpair_multimap.rbegin();
+        for (int i = 0; i < topCnt && rit != freqWordpair_multimap.rend(); ++i, ++rit) {
+             outFile << "<" << rit->second.first << ", " << rit->second.second << ">: " << rit->first << std::endl;
+        }
+
+        outFile << std::endl;
+
+        outFile << "Top " << botCnt << " least frequent word-pairs:" << std::endl;
+        auto it = freqWordpair_multimap.begin();
+        for (int i = 0; i < botCnt && it != freqWordpair_multimap.end(); ++i, ++it) {
+            outFile << "<" << it->second.first << ", " << it->second.second << ">: " << it->first << std::endl;
+        }
+        
+        outFile.close();
+    }   
 }
