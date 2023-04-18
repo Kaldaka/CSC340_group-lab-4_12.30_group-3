@@ -44,6 +44,23 @@ namespace NS_WORDPAIRS{
         inFS.close();
     }
 
+    void sentenceSplitterZYB(std::string& text, std::vector<std::string>& sentences) {
+        std::ofstream outFS;
+        std::string fName = "test_text_to_parse.txt";
+
+        outFS.open(fName);
+
+        if (!outFS.is_open()) {
+            std::cout << "could not open or create file." << std::endl;
+            return;
+        }
+
+        outFS << text;
+        outFS.close();
+
+        sentenceSplitter(fName, sentences);
+    }
+
     void wordpairMapping(std::vector<std::string>& sentences, std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map){
 
     }
