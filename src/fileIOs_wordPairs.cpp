@@ -3,10 +3,11 @@
 #include <fstream>
 #include <regex>
 #include <iterator>
+#include <sstream>
 
-namespace NS_WORDPAIRS{
+namespace NS_WORDPAIRS {
 
-    void sentenceSplitter(std::string& fname, std::vector<std::string>& sentences){
+    void sentenceSplitter(std::string& fname, std::vector<std::string>& sentences) {
         std::map<std::pair<std::string, std::string>, int> wordPairFreq_map;
         std::string fileName = fname;
         std::string line = "";
@@ -37,7 +38,7 @@ namespace NS_WORDPAIRS{
                     }
                     it++;
                 }
-            }   
+            }
         }
 
         wordpairMapping(sentences, wordPairFreq_map);
@@ -61,17 +62,61 @@ namespace NS_WORDPAIRS{
         sentenceSplitter(fName, sentences);
     }
 
-    void wordpairMapping(std::vector<std::string>& sentences, std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map){
-
+    // utilizing a vector to get the tokens from the sentences
+    void tokenMaker(std::vector<std::string>& tokens, const std::string& sentence) {
+        std::istringstream iss(sentence);
+        std::string word;
+        while (iss >> word) {
+            // convert to lowercase
+            std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+            tokens.push_back(word);
+        }
     }
 
-    void freqWordpairMmap(std::map<std::pair<std::string,std::string>, int> &wordpairFreq_map, std::multimap<int, std::pair<std::string, std::string> > &freqWordpair_mmap ){
+    // taking a list of tokens and converting them in to pairs one by one through comparison
+    void pairMaker(const std::vector<std::string>& tokens, std::list<std::pair<std::string, std::string>>& tokenPairs) {
+        for (size_t i = 0; i < tokens.size() - 1; i++) {
+            for (size_t j = i + 1; j < tokens.size(); j++) {
+                //checking to see if the words are same
+                if (tokens[i] != tokens[j]) {
+                    std::string first = tokens[i];
+                    std::string second = tokens[j];
+                    // arranging the pair in lexicographical order
+                    if (first > second) {
+                        std::swap(first, second);
+                    }
+                    tokenPairs.push_back(std::make_pair(first, second));
+                }
+            }
+        }
+    }
+
+    void wordpairMapping(std::vector<std::string>& sentences, std::map<std::pair<std::string, std::string>, int>& wordpairFreq_map) {
+        for (const std::string& sentence : sentences) {
+            std::vector<std::string> tokens;
+            tokenMaker(tokens, sentence);
+            std::list<std::pair<std::string, std::string>> tokenPairs;
+            pairMaker(tokens, tokenPairs);
+            std::map<std::pair<std::string, std::string>, bool> pairAlreadyCounted;
+            for (const auto& pair : tokenPairs) {
+                // check if the pair has already been counted in the current sentence
+                if (wordpairFreq_map[pair] == 0 || !pairAlreadyCounted[pair])
+                {
+                    // update the frequency in the map
+                    wordpairFreq_map[pair]++;
+                    pairAlreadyCounted[pair] = true;
+                }
+            }
+        }
+    }
+
+    void freqWordpairMmap(std::map<std::pair<std::string, std::string>, int>& wordpairFreq_map, std::multimap<int, std::pair<std::string, std::string> >& freqWordpair_mmap) {
         for (const auto& pair : wordpairFreq_map) {
             freqWordpair_mmap.insert(std::make_pair(pair.second, pair.first));
         }
     }
 
-    void printWordpairs(std::multimap<int, std::pair<std::string, std::string> > &freqWordpair_multimap, std::string outFname, int topCnt, int botCnt){
+    void printWordpairs(std::multimap<int, std::pair<std::string, std::string> >& freqWordpair_multimap, std::string outFname, int topCnt, int botCnt) {
         std::ofstream outFile(outFname);
 
         if (!outFile.is_open()) {
@@ -82,7 +127,7 @@ namespace NS_WORDPAIRS{
         outFile << "Top " << topCnt << " most frequent word-pairs:" << std::endl;
         auto rit = freqWordpair_multimap.rbegin();
         for (int i = 0; i < topCnt && rit != freqWordpair_multimap.rend(); ++i, ++rit) {
-             outFile << "<" << rit->second.first << ", " << rit->second.second << ">: " << rit->first << std::endl;
+            outFile << "<" << rit->second.first << ", " << rit->second.second << ">: " << rit->first << std::endl;
         }
 
         outFile << std::endl;
@@ -92,7 +137,7 @@ namespace NS_WORDPAIRS{
         for (int i = 0; i < botCnt && it != freqWordpair_multimap.end(); ++i, ++it) {
             outFile << "<" << it->second.first << ", " << it->second.second << ">: " << it->first << std::endl;
         }
-        
+
         outFile.close();
-    }   
+    }
 }
