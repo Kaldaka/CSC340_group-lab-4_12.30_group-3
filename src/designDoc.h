@@ -24,12 +24,12 @@
         
         
         function wordpairMapping(const sentences: vector<string>, wordpairFreq_map: map<pair<string, string>, int>)
-    for each sentence in sentences do
+    for each sentence in sentences then,
         tokens = empty vector of strings
         tokenMaker(tokens, sentence) // tokenize the sentence
          pairMaker(tokens, pairs) // make pairs
         for i = 0 to tokens.size() - 2 then
-            for j = i + 1 to tokens.size() - 1 then
+            for j = i + 1 to tokens.size() - 1 iterate and do
                 first = tokens[i]
                 second = tokens[j]
                 if (first > second) then // arrange the pair in lexicographical order
