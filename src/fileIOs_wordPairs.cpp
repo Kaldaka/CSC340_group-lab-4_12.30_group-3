@@ -1,5 +1,4 @@
 #include "fileIOs_wordPairs.h"
-#include <iostream>
 #include <fstream>
 #include <regex>
 #include <iterator>
@@ -8,11 +7,13 @@
 namespace NS_WORDPAIRS {
 
     void sentenceSplitter(std::string& fname, std::vector<std::string>& sentences) {
+        //setup of local variables
         std::map<std::pair<std::string, std::string>, int> wordPairFreq_map;
         std::string fileName = fname;
         std::string line = "";
         std::ifstream inFS;
 
+        //checking if file can be accessed   
         inFS.open(fileName);
         if (!inFS.is_open()) {
             std::cout << "Could not open " << fileName << ", please try again." << std::endl;
@@ -20,22 +21,30 @@ namespace NS_WORDPAIRS {
             sentenceSplitter(fileName, sentences);
         }
 
+        //beginning of main algorithm, running while there is a line to be read
         while (std::getline(inFS, line)) {
             std::string::iterator it = line.begin();
             int fromIndex = 0;
             int toIndex = it - line.begin();
             if (line != "") {//covers paragraph spacers that are empty strings
                 while (it != line.end()) {//iterates over each continuous block of text between newlines
+
+                    //first if checks for . and ?, marking the end of a sentence
                     if (*it == '.' || *it == '?') {
                         toIndex = (it - line.begin()) - fromIndex;
                         sentences.push_back(line.substr(fromIndex, toIndex));
+
+                        //this if checks if the . or ? is followd by ", marking the end of a quoted sentence
                         if (it + 1 != line.end() && *(it + 1) == '"') {
+                            //if sentence ends with ", advance fromIndex 3 places to be at the start of a new sentence
                             fromIndex = it - line.begin() + 3;
                         }
                         else {
                             fromIndex = it - line.begin() + 2;
                         }
                     }
+
+                    //last if checks for : at the end of a line, marking the end of a line with a different form of punctuation
                     if (*it == ':' && it + 1 == line.end()) {
                         sentences.push_back(line.substr(fromIndex));
                     }
@@ -43,17 +52,10 @@ namespace NS_WORDPAIRS {
                 }
             }
         }
-
-        int count = 0;
-        for (std::string sentence : sentences) {
-            count++;
-            std::cout << "sentence " << count << ": " << sentence << std::endl;
-        }
-
-        wordpairMapping(sentences, wordPairFreq_map);
         inFS.close();
     }
 
+    //turns text into a file and calls the main sentenceSplitter
     void sentenceSplitterZYB(std::string& text, std::vector<std::string>& sentences) {
         std::ofstream outFS;
         std::string fName = "test_text_to_parse.txt";
@@ -133,15 +135,15 @@ namespace NS_WORDPAIRS {
             return;
         }
 
-        outFile << "Top " << topCnt << " most frequent word-pairs:" << std::endl;
+        //outFile << "Top " << topCnt << " most frequent word-pairs:" << std::endl;
         auto rit = freqWordpair_multimap.rbegin();
         for (int i = 0; i < topCnt && rit != freqWordpair_multimap.rend(); ++i, ++rit) {
             outFile << "<" << rit->second.first << ", " << rit->second.second << ">: " << rit->first << std::endl;
         }
 
-        outFile << std::endl;
+        //outFile << std::endl;
 
-        outFile << "Top " << botCnt << " least frequent word-pairs:" << std::endl;
+        //outFile << "Top " << botCnt << " least frequent word-pairs:" << std::endl;
         auto it = freqWordpair_multimap.begin();
         for (int i = 0; i < botCnt && it != freqWordpair_multimap.end(); ++i, ++it) {
             outFile << "<" << it->second.first << ", " << it->second.second << ">: " << it->first << std::endl;
