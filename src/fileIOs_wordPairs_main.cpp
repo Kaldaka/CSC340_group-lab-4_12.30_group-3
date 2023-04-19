@@ -3,7 +3,7 @@
 using namespace NS_WORDPAIRS;
 
 int main(){
-    std::string fileName = "inputFile.txt";
+    std::string fileName = "SteveJobsSpeech2005.txt";
     std::string rawText = "";
     std::vector<std::string> sentences;
     int option = 1;

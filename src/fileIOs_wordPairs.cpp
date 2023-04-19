@@ -24,9 +24,9 @@ namespace NS_WORDPAIRS {
             std::string::iterator it = line.begin();
             int fromIndex = 0;
             int toIndex = it - line.begin();
-            if (line != "") {
-                while (it != line.end()) {
-                    if (*it == '.' || *it == '?') {
+            if (line != "") {//covers paragraph spacers that are empty strings
+                while (it != line.end()) {//iterates over each continuous block of text between newlines
+                    if (*it == '.' || *it == '?' || (*it == ':' && it+1 == line.end())) {
                         toIndex = (it - line.begin()) - fromIndex;
                         sentences.push_back(line.substr(fromIndex, toIndex));
                         if (it + 1 != line.end() && *(it + 1) == '"') {
@@ -39,6 +39,12 @@ namespace NS_WORDPAIRS {
                     it++;
                 }
             }
+        }
+
+        int count = 0;
+        for (std::string sentence : sentences) {
+            count++;
+            std::cout << "sentence " << count << ": " << sentence << std::endl;
         }
 
         wordpairMapping(sentences, wordPairFreq_map);
