@@ -26,7 +26,7 @@ namespace NS_WORDPAIRS {
             int toIndex = it - line.begin();
             if (line != "") {//covers paragraph spacers that are empty strings
                 while (it != line.end()) {//iterates over each continuous block of text between newlines
-                    if (*it == '.' || *it == '?' || (*it == ':' && it+1 == line.end())) {
+                    if (*it == '.' || *it == '?') {
                         toIndex = (it - line.begin()) - fromIndex;
                         sentences.push_back(line.substr(fromIndex, toIndex));
                         if (it + 1 != line.end() && *(it + 1) == '"') {
@@ -35,6 +35,9 @@ namespace NS_WORDPAIRS {
                         else {
                             fromIndex = it - line.begin() + 2;
                         }
+                    }
+                    if (*it == ':' && it + 1 == line.end()) {
+                        sentences.push_back(line.substr(fromIndex));
                     }
                     it++;
                 }
